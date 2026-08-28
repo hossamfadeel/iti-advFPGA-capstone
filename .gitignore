@@ -1,0 +1,68 @@
+# ---- Vivado ----
+.Xil/
+*.jou
+*.log
+*.str
+*.bak
+*.runs/
+*.cache/
+*.hw/
+*.sim/
+*.ip_user_files/
+*.gen/
+*.api
+*.wdb
+*.wcfg
+# generated bitstreams/reports are CI artifacts, not sources
+*.bit
+*.ltx
+*.rpt
+*.dcp
+*.il?
+
+# ---- Vitis HLS ----
+*.csim/
+*.syn/
+*.cosim/
+*.exp/
+*.prj/
+solution*/
+*.zip
+*.xo
+
+# ---- Vitis / Vitis AI ----
+*.xclbin
+*.xmodel.tmp/
+_build/
+ps_repo/
+
+# ---- PetaLinux / embedded ----
+*.elf
+*.bin
+images/linux/
+project-spec/meta-*/
+
+# ---- Python (dashboard, training) ----
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# ---- Model artifacts: commit small final xmodel, never checkpoints ----
+*.pth
+*.ckpt
+*.onnx
+
+# ---- Large data: instructor-provided, mirrored on NAS ----
+data/*
+!data/.gitkeep
+*.iq
+*.csv
+
+# ---- OS / editor ----
+Thumbs.db
+.DS_Store
+*.swp
+.idea/
+.vscode/

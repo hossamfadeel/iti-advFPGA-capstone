@@ -1,0 +1,43 @@
+name: FPGA CI
+
+# SPECTRUM SENTRY CI: gates every PR on simulation; nightly full build gates
+# on timing (WNS >= 0) and utilization (< 80% every category).
+# Runner: self-hosted with Vivado/Vitis 2023.2 education licenses
+# (setup doc: ci/runner-setup.md -- provided in starter platform Appendix A).
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 2 * * *"   # nightly full build, 02:00 runner-local time
+
+jobs:
+  fast:
+    name: csim + xsim regression (no Vivado impl)
+    runs-on: [self-hosted, fpga]
+    if: github.event_name != 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      - name: HLS csim
+        run: make csim
+      - name: xsim regression (every TB prints PASS)
+        run: make regress
+
+  nightly:
+    name: full build + gates
+    runs-on: [self-hosted, fpga]
+    if: github.event_name == 'schedule' || github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build NODE_A and NODE_B (synth + impl + WNS gate)
+        run: |
+          make all TOPOPT=NODE_A
+          make all TOPOPT=NODE_B
+      - name: Utilization gate (< 80% every category)
+        run: python ci/gates/util_gate.py build/
+      - name: Archive artifacts (bitstreams + reports)
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentry-build-${{ github.sha }}
+          path: build/
