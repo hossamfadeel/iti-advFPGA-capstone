@@ -47,7 +47,7 @@ Full specification: [docs/Capstone_Project_Spectrum_Sentry.md](docs/Capstone_Pro
 
 ```bash
 git clone <repo-url>
-cd iti_advFPGA_capstone
+cd iti-advFPGA-capstone
 make help          # list targets
 make regress       # xsim regression: every testbench prints PASS (no board needed)
 make csim          # HLS C-simulation for all kernels (no board needed)
