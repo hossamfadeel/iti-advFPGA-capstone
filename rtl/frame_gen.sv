@@ -40,10 +40,13 @@ module frame_gen #(
 
   assign o_seq = seq;
 
-  // Combinational: while a payload beat is being accepted downstream, accept
-  // the next producer beat in the same cycle (registered refill, II=1).
+  // Combined handshake: the producer fills the output register when it is
+  // empty OR draining this cycle. Data is captured ONLY on a real s-side
+  // handshake -- never speculatively (the speculative copy duplicated beats
+  // and shifted frame boundaries; found by the e2e gate, see VERIFICATION_PLAN).
   wire pay_accept = (state == FG_PAY) && m_tvalid && m_tready;
-  assign s_tready = pay_accept;
+  assign s_tready = (state == FG_PAY) && (!m_tvalid || pay_accept);
+  wire pay_load   = (state == FG_PAY) && s_tvalid && s_tready;
 
   wire [63:0] hdr_beat = {32'h0, P_TYPE, seq, MAGIC};
 
@@ -76,26 +79,23 @@ module frame_gen #(
         end
 
         FG_PAY: begin
-          if (!m_tvalid) begin
-            // Load first/next payload beat from producer
-            if (s_tvalid) begin
-              m_tvalid <= 1'b1;
-              m_tdata  <= s_tdata;
-              m_tlast  <= 1'b0;
-            end
+          // (1) load: a real producer handshake fills the (empty or
+          //     draining) output register
+          if (pay_load) begin
+            m_tvalid <= 1'b1;
+            m_tdata  <= s_tdata;
+            m_tlast  <= 1'b0;
           end else if (pay_accept) begin
-            // Current beat leaves; fold it into the CRC
+            m_tvalid <= 1'b0;   // drained, nothing new offered
+          end
+          // (2) emit: fold the departing beat into the CRC
+          if (pay_accept) begin
             crc_run <= crc32_beat(crc_run, m_tdata);
             if (pay_cnt == 5'd29) begin
               crc_final <= crc32_beat(crc_run, m_tdata) ^ 32'hFFFF_FFFF;
               state     <= FG_CRCB;
             end else begin
               pay_cnt <= pay_cnt + 5'd1;
-              // Refill from producer in the same cycle
-              if (s_tvalid) begin
-                m_tvalid <= 1'b1;
-                m_tdata  <= s_tdata;
-              end
             end
           end
         end

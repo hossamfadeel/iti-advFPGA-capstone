@@ -164,19 +164,6 @@ module tb_sentry_e2e;
     .o_irq            ()
   );
 
-  // Debug heartbeat: chain state every 500 ns
-  int unsigned hb = 0;
-  always #500 begin
-    $display("[E2E %0t] fg=%b fifo_f=%b fifo_e=%b fc_rdy=%b dc_v=%b rm_rdy=%b out_v=%b",
-             $time, fg_valid, fifo_wfull, fifo_rempty, fc_sready, dc_mvalid,
-             rm_sready, out_if.tvalid);
-    hb++;
-    if (hb == 20) begin
-      $display("FATAL: e2e heartbeat timeout");
-      $finish;
-    end
-  end
-
   initial begin
     uvm_config_db#(virtual axis_if)::set(null, "uvm_test_top.env.stream_in_ag.*",
                                          "vif", in_wr_if);

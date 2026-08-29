@@ -41,8 +41,8 @@ module decouple (
 
   always_ff @(posedge clk) begin
     if (!rst_n) begin
-      rm_rstn <= 1'b1;
-      swapping <= 1'b0;
+      rm_rstn  <= 1'b0;   // system reset: RM held in reset (BUG FIX: was 1,
+      swapping <= 1'b0;   // which X-poisoned the RM at power-up)
     end else begin
       rm_rstn  <= !hold;
       swapping <= hold;
