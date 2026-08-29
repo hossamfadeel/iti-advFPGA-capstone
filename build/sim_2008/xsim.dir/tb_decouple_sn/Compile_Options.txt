@@ -1,0 +1,1 @@
+-debug "typical" -s "tb_decouple_sn" -L "uvm_lib" -L "sentry" --timescale "1ns/1ps" "sentry.tb_decouple" 
