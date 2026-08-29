@@ -1,50 +1,49 @@
 # ITI Advanced FPGA Capstone -- SPECTRUM SENTRY
-# Top-level orchestration. Non-project flow: TCL scripts do the work.
+# Top-level orchestration. UVM + HLS regressions need no board (the virtual
+# ZCU102); synth needs a Vivado install. Override AMD_TOOLS for your install.
 
-VIVADO ?= vivado
-VITIS_HLS ?= vitis_hls
-XSIM ?= xvlog
-TOPOPT ?= NODE_B   # NODE_A | NODE_B
+AMD_TOOLS ?= C:/AMDDesignTools/2025.2
 
-.PHONY: help csim regress synth impl all sw gates clean
+.PHONY: help vectors regress regress-uvm regress-hls synth impl all sw gates clean
 
 help:
 	@echo "Targets:"
-	@echo "  csim      HLS C-simulation, all kernels (no board)"
-	@echo "  regress   xsim regression, all testbenches must print PASS"
-	@echo "  synth     non-project synthesis checkpoint ($(TOPOPT))"
-	@echo "  impl      place/route + timing gate + write bitstream"
-	@echo "  all       synth + impl"
-	@echo "  sw        build A53 apps + host dashboard"
-	@echo "  gates     run CI gates (WNS, utilization) on latest checkpoint"
-	@echo "  clean     remove build artifacts"
+	@echo "  vectors      regenerate golden vectors (python+numpy, seed 260)"
+	@echo "  regress      FULL regression: UVM (4 TBs) + HLS csim (4 kernels)"
+	@echo "  regress-uvm  UVM only: xsim + UVM 1.2 (UVM_NO_DPI); every TB prints PASS"
+	@echo "  regress-hls  HLS csim only: vitis-run --tcl per kernel"
+	@echo "  synth        non-project synthesis checkpoint (NODE_B)"
+	@echo "  impl         place/route + WNS gate + bitstream (NODE_B)"
+	@echo "  all          synth + impl"
+	@echo "  gates        run CI gates (WNS, utilization) on latest checkpoint"
+	@echo "  clean        remove build artifacts"
 
-# HLS kernels: each kernel dir owns src/, tb/, run_hls.tcl (Week-1 Day-1 stubs)
-HLS_KERNELS = fft_psd fir_chan tile_pack replay_gov
+vectors:
+	python sw/golden/gen_vectors.py
 
-csim:
-	@for k in $(HLS_KERNELS); do \
-	    echo "== csim: $$k"; \
-	    (cd hls/$$k && $(VITIS_HLS) -f run_hls.tcl -tclargs csim) || exit 1; \
-	done
+regress-uvm:
+	./ci/regress_uvm.sh
 
-# Simulation regression: every testbench prints PASS on the last line
-regress:
-	./ci/regress.sh
+regress-hls:
+	AMD_TOOLS=$(AMD_TOOLS) ./ci/regress_hls.sh
+
+regress: regress-uvm regress-hls
+	@echo "FULL REGRESSION COMPLETE"
 
 synth:
-	$(VIVADO) -mode batch -source ci/build.tcl -tclargs synth $(TOPOPT)
+	vivado -mode batch -source ci/build.tcl -tclargs synth NODE_B
 
 impl:
-	$(VIVADO) -mode batch -source ci/build.tcl -tclargs impl $(TOPOPT)
+	vivado -mode batch -source ci/build.tcl -tclargs impl NODE_B
 
 all: synth impl
 
 sw:
-	@echo "TODO(T5): a53 apps + VART + dashboard build scripts"
+	@echo "sw/: a53 apps + host dashboard are bench-stage deliverables (see docs/REPRODUCE.md)"
 
 gates:
-	$(VIVADO) -mode batch -source ci/gates/wns_gate.tcl
+	vivado -mode batch -source ci/gates/wns_gate.tcl
 
 clean:
-	rm -rf build/ *.jou *.log .Xil
+	rm -rf build/ xsim.dir/ *.jou *.log .Xil
+	find hls -maxdepth 2 -name "*_proj" -type d -exec rm -rf {} + 2>/dev/null || true

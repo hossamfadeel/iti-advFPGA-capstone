@@ -285,6 +285,9 @@ def main():
     ci = rng.integers(-20000, 20000, 2048).astype(int)
     cq = rng.integers(-20000, 20000, 2048).astype(int)
     hr = fir_coeffs()
+    with open(VDIR / "fir_coeffs.mem", "w") as f:
+        for h in hr:
+            f.write(f"{int(h) & 0xFFFF:04x}" + chr(10))
     outs = fir_chan_model([int(x) for x in ci[:1024]], [int(x) for x in cq[:1024]], hr)
     with open(VDIR / "fir_in.mem", "w") as f:
         for k in range(1024):
@@ -301,7 +304,7 @@ def main():
     print("detections         :", len(dets), "of", n_e2e, "frames (THR=0x%x)" % thr)
     print("fft vectors        :", NFFT, "samples /", NFFT, "psd bytes")
     print("tile vectors       : 1 tile,", len(tile_beats), "beats")
-    print("fir vectors        : 1024 in ->", len(outs), "out")
+    print("fir vectors        : 1024 in ->", len(outs), "out +", len(hr), "coeffs")
     print("OK")
 
 if __name__ == "__main__":

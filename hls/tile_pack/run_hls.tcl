@@ -1,0 +1,14 @@
+# tile_pack: csim (regression) + optional csynth
+open_project -reset tile_pack_proj
+set_top tile_pack
+add_files src/tile_pack.cpp
+add_files -tb tb/tb_tile_pack.cpp -cflags "-Isrc"
+open_solution sol1 -flow_target vivado
+set_part xczu9eg-ffvb1156-2-e
+create_clock -period 4
+# DSE knobs (compare schedule reports):
+#   set_directive_pipeline -II 1 "ROW"
+#   set_directive_pipeline -II 1 "OUT"
+csim_design
+# csynth_design
+exit

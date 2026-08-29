@@ -43,16 +43,30 @@ Full specification: [docs/Capstone_Project_Spectrum_Sentry.md](docs/Capstone_Pro
 | `data/` | (git-ignored) | IQ captures, RadioML subset -- instructor-provided, never committed |
 | `docs/` | everyone | Capstone spec, ICD (frozen Day 2 17:00), reports |
 
-## Quickstart
+## Quickstart (verified on AMD tools 2025.2, no board needed)
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/hossamfadeel/iti-advFPGA-capstone
 cd iti-advFPGA-capstone
-make help          # list targets
-make regress       # xsim regression: every testbench prints PASS (no board needed)
-make csim          # HLS C-simulation for all kernels (no board needed)
-make synth         # non-project synthesis via ci/build.tcl (needs Vivado 2023.2)
+make vectors       # regenerate golden vectors (python, seed 260)
+make regress-uvm   # 4 UVM testbenches on xsim: every TB prints PASS
+make regress-hls   # 4 HLS kernels csim via vitis-run: exact golden match
+# or simply: make regress
 ```
+
+Current status: ALL EIGHT GATES PASS (4 UVM TBs + 4 HLS csims, zero
+tolerance). See docs/PROJECT_REPORT.md for the what/when/where/why/how.
+
+## Documentation map
+
+| Document | Purpose |
+|----------|---------|
+| docs/PROJECT_REPORT.md | the full report: what, why, when, where, how |
+| docs/ARCHITECTURE.md | top-down spec: requirements -> architecture -> blocks |
+| docs/DESIGN_FLOW.md | the V-model methodology, step by step (teaching) |
+| docs/ICD.md | frozen interface control document |
+| docs/VERIFICATION_PLAN.md | UVM architecture, test matrix, tool-issue log |
+| docs/REPRODUCE.md | step-by-step reproduction + troubleshooting |
 
 Everything except bench milestones is board-independent: CI-first is the
 scheduling philosophy of this project.
