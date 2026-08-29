@@ -1,1 +1,0 @@
--debug "typical" -s "tb_sentry_e2e_sn" -L "uvm_lib" -L "sentry" --timescale "1ns/1ps" "sentry.tb_sentry_e2e" 

@@ -60,6 +60,13 @@ data/*
 *.iq
 *.csv
 
+# ---- simulation / build trees (never commit artifacts) ----
+build/
+xsim.dir/
+*.wdb
+*.wcfg
+isim/
+
 # ---- OS / editor ----
 Thumbs.db
 .DS_Store
