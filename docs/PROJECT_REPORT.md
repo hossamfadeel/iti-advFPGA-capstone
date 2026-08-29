@@ -112,6 +112,7 @@ the exact reason the integration gate exists.
 | Constraints / block designs | `constr/*.xdc`, `bd/*.tcl` |
 | CI workflow | `.github/workflows/fpga.yml` |
 | Tools on this machine | `C:\AMDDesignTools\2025.2` (Vivado xsim + Vitis via `vitis-run`) |
+| Dual-board support (ZCU102 + KR260) | `docs/BOARDS.md`, `constr/<board>/`, `ci/build.tcl` BOARD arg |
 | Repository | https://github.com/hossamfadeel/iti-advFPGA-capstone (private) |
 
 ---

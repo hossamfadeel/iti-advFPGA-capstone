@@ -91,11 +91,13 @@ make vectors && make regress
 ## 5. Synthesis path (needs the tools; board not required)
 
 ```bash
-make synth    # non-project synth checkpoint + utilization/timing reports
-make impl     # place/route; gates on WNS >= 0 before writing the bitstream
+make synth BOARD=kr260   # or BOARD=zcu102 (platform layer is board-aware)
+make impl  BOARD=kr260   # WNS gate + bitstream (+ .bin for Kria loaders)
 ```
-Block-design skeletons: `bd/node_a.tcl`, `bd/node_b.tcl`; constraints:
-`constr/node_a.xdc`, `constr/node_b.xdc` (clocks, CDC false paths).
+Board support: see docs/BOARDS.md (delta table + the 2x KR260 bring-up
+checklist; KR260 physical pins come from AMD XTP685 into
+constr/kr260/carrier_pins.xdc). Block-design skeletons: `bd/*.tcl`;
+logical constraints: `constr/<board>/node_*.xdc`.
 
 ## 6. Hardware bring-up (when ZCU102 boards are available)
 

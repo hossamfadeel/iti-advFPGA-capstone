@@ -55,7 +55,9 @@ make regress-hls   # 4 HLS kernels csim via vitis-run: exact golden match
 ```
 
 Current status: ALL EIGHT GATES PASS (4 UVM TBs + 4 HLS csims, zero
-tolerance). See docs/PROJECT_REPORT.md for the what/when/where/why/how.
+tolerance) -- and they are BOARD-INDEPENDENT: the same regression is the
+signoff for both ZCU102 and Kria KR260 (`make synth BOARD=kr260|zcu102`).
+See docs/PROJECT_REPORT.md and docs/BOARDS.md.
 
 ## Documentation map
 
@@ -67,6 +69,7 @@ tolerance). See docs/PROJECT_REPORT.md for the what/when/where/why/how.
 | docs/ICD.md | frozen interface control document |
 | docs/VERIFICATION_PLAN.md | UVM architecture, test matrix, tool-issue log |
 | docs/REPRODUCE.md | step-by-step reproduction + troubleshooting |
+| docs/BOARDS.md | dual-board support: ZCU102 + Kria KR260 (delta table, 2x KR260 bring-up) |
 
 Everything except bench milestones is board-independent: CI-first is the
 scheduling philosophy of this project.
